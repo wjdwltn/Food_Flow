@@ -20,4 +20,12 @@ public class Item {
     private int price;
     private int quantity;
     private long storeId;
+
+    public int minusQuantity() {
+        if (quantity == 0) {
+            throw new IllegalStateException("남은 재고가 없습니다.");
+        }
+
+        return quantity - 1;
+    }
 }
