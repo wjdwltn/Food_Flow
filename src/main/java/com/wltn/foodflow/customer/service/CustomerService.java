@@ -43,7 +43,7 @@ public class CustomerService {
 
     @Transactional
     public CustomerItem buyItem(long customerId, long itemId){
-        Item item = itemService.minusRemained(itemId);
+        Item item = itemService.minusQuantity(itemId);
         Customer customer = minusPoint(customerId, item);
         CustomerItem customerItem = customerItemService.customerItemSave(customer.getCustomerId(),item.getItemId());
         return customerItem;
