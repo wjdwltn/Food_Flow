@@ -4,6 +4,7 @@ import com.wltn.foodflow.item.entity.Item;
 import com.wltn.foodflow.item.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +16,7 @@ public class ItemService {
     private final ItemRepository itemRepository;
 
     @Transactional
+    @CacheEvict(value = "itemCache", key = "#storeId")
     public Item itemSave(long storeId, String itemName, int price, int quantity) {
         Item item = Item.builder()
                 .storeId(storeId)
@@ -28,6 +30,12 @@ public class ItemService {
 
     @Transactional(readOnly = true)
     public List<Item> showRemainItemListByStoreId(long storeId) {
+        return this.itemRepository.selectItemListByStoreId(storeId);
+    }
+
+    @Cacheable(value = "itemCache", key = "#storeId")
+    @Transactional(readOnly = true)
+    public List<Item> showRemainItemListByStoreIdWithCache(long storeId) {
         return this.itemRepository.selectItemListByStoreId(storeId);
     }
 
