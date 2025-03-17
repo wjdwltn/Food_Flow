@@ -51,7 +51,6 @@ public class CustomerService {
         return customer;
     }
 
-    @Transactional
     public CustomerItem buyItem(long customerId, long itemId){
         Item item = itemService.minusQuantity(itemId);
         Customer customer = minusPoint(customerId, item);
@@ -59,6 +58,7 @@ public class CustomerService {
     }
 
 
+    @Transactional
     @RedissonLock(key = "#customerId")
     public CustomerItem buyItemWithRedisson(long customerId, long itemId) {
         return buyItem(customerId, itemId);
