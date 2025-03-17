@@ -1,5 +1,6 @@
 package com.wltn.foodflow.customer.service;
 
+import com.wltn.foodflow.aop.RedissonLock;
 import com.wltn.foodflow.customer.entity.Customer;
 import com.wltn.foodflow.customer.repository.CustomerRepository;
 import com.wltn.foodflow.customeritem.entity.CustomerItem;
@@ -8,15 +9,24 @@ import com.wltn.foodflow.item.entity.Item;
 import com.wltn.foodflow.item.repository.ItemRepository;
 import com.wltn.foodflow.item.service.ItemService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import java.util.concurrent.TimeUnit;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class CustomerService {
     private final CustomerRepository customerRepository;
     private final ItemService itemService;
     private final CustomerItemService customerItemService;
+    private final RedissonClient redissonClient;
+
 
     @Transactional
     public Customer customerSave(String customerName, int point) {
@@ -45,9 +55,12 @@ public class CustomerService {
     public CustomerItem buyItem(long customerId, long itemId){
         Item item = itemService.minusQuantity(itemId);
         Customer customer = minusPoint(customerId, item);
-        CustomerItem customerItem = customerItemService.customerItemSave(customer.getCustomerId(),item.getItemId());
-        return customerItem;
+        return customerItemService.customerItemSave(customer.getCustomerId(),item.getItemId());
     }
 
 
+    @RedissonLock(key = "#customerId")
+    public CustomerItem buyItemWithRedisson(long customerId, long itemId) {
+        return buyItem(customerId, itemId);
+    }
 }
