@@ -112,4 +112,36 @@ class ItemServiceTest {
         System.out.println("데이터베이스 : " + timeGapForDatabase);
         System.out.println("캐시 : " + timeGapForCache);
     }
+
+    @Test
+    @DisplayName("데이터_등록시_갱신_테스트")
+    public void 데이터_등록시_갱신_테스트() {
+        Store store = this.storeService.saveStore("음식점1", StoreType.KOREAN);
+        this.itemService.itemSave(store.getStoreId(), "비빔밥", 8000, 10);
+
+        List<Item> itemsWithCacheFirst = itemService.showRemainItemListByStoreIdWithCache(store.getStoreId());
+
+        itemService.itemSave(store.getStoreId(), "비빔국수", 8500, 10);
+        List<Item> itemsWithCacheSecond = itemService.showRemainItemListByStoreIdWithCache(store.getStoreId());
+
+        assertThat(itemsWithCacheFirst).isNotEqualTo(itemsWithCacheSecond);
+        assertThat(itemsWithCacheFirst.size()).isLessThan(itemsWithCacheSecond.size());
+    }
+
+    @Test
+    @DisplayName("재고_없을때_안보이는_테스트")
+    public void 재고_없을때_안보이는_테스트() {
+        Store store = storeService.saveStore("음식점1", StoreType.KOREAN);
+        Item item = itemService.itemSave(store.getStoreId(), "비빔밥", 8000, 1);
+
+        List<Item> itemsWithCacheFirst = itemService.showRemainItemListByStoreIdWithCache(store.getStoreId());
+
+        Customer customer = customerService.customerSave("밥매니아", 30000);
+        customerService.buyItem(customer.getCustomerId(), item.getItemId());
+
+        List<Item> itemsWithCacheSecond = itemService.showRemainItemListByStoreIdWithCache(store.getStoreId());
+
+        assertThat(itemsWithCacheFirst).isNotEqualTo(itemsWithCacheSecond);
+        assertThat(itemsWithCacheFirst.size()).isGreaterThan(itemsWithCacheSecond.size());
+    }
 }
