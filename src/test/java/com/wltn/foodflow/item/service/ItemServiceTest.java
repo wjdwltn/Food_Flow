@@ -73,4 +73,43 @@ class ItemServiceTest {
                 item -> assertThat(!itemRemainList.contains(item)).isTrue()
         );
     }
+
+    @Test
+    @DisplayName(" 여러_유저가_보는_경우")
+    public void 여러_유저가_보는_경우() {
+        Store store = this.storeService.saveStore("음식점1", StoreType.KOREAN);
+        this.itemService.itemSave(store.getStoreId(), "비빔밥", 8000, 10);
+
+        // 동일성 테스트
+        List<Item> itemsWithoutCache = itemService.showRemainItemListByStoreId(store.getStoreId());
+        List<Item> itemsWithCache = itemService.showRemainItemListByStoreIdWithCache(store.getStoreId());
+
+        for (int i=0; i<itemsWithoutCache.size(); i++) {
+            assertThat(itemsWithoutCache.get(i).getItemId()).isEqualTo(itemsWithCache.get(i).getItemId());
+        }
+
+        long startTime = System.currentTimeMillis();
+
+        for (int i=0; i<50000; i++) {
+            itemService.showRemainItemListByStoreId(store.getStoreId());
+        }
+        long stopTime = System.currentTimeMillis();
+
+        long timeGapForDatabase = (stopTime - startTime);
+
+        // 캐시를 통해 가져오기
+        startTime = System.currentTimeMillis();
+
+        for (int i=0; i<50000; i++) {
+            itemService.showRemainItemListByStoreIdWithCache(store.getStoreId());
+        }
+        stopTime = System.currentTimeMillis();
+
+        long timeGapForCache = (stopTime - startTime);
+
+        // 확인
+        assertThat(timeGapForDatabase).isGreaterThan(timeGapForCache);
+        System.out.println("데이터베이스 : " + timeGapForDatabase);
+        System.out.println("캐시 : " + timeGapForCache);
+    }
 }
