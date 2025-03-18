@@ -144,4 +144,38 @@ class ItemServiceTest {
         assertThat(itemsWithCacheFirst).isNotEqualTo(itemsWithCacheSecond);
         assertThat(itemsWithCacheFirst.size()).isGreaterThan(itemsWithCacheSecond.size());
     }
+
+    @Test
+    public void 많이_팔린_순서_정렬() {
+        Store store = storeService.saveStore("음식점", StoreType.KOREAN);
+        Store dummyStore = storeService.saveStore("미사용음식점", StoreType.KOREAN);
+        Store dummyStore2 = storeService.saveStore("미사용음식점2", StoreType.KOREAN);
+        List<Item> itemArrayList = new ArrayList<>();
+        List<Item> dummyItemArrayList = new ArrayList<>();
+        List<Item> dummyItemArrayList2 = new ArrayList<>();
+
+        for (int i = 0; i < 100; i++) {
+            itemArrayList.add(itemService.itemSave(store.getStoreId(), "테스트데이터" + i, 1000, 900));
+            dummyItemArrayList.add(itemService.itemSave(dummyStore.getStoreId(), "더미데이터" + i, 1000, 900));
+            dummyItemArrayList2.add(itemService.itemSave(dummyStore2.getStoreId(), "더미데이터" + i, 1000, 900));
+        }
+
+        Customer customer = customerService.customerSave("TestUser", Integer.MAX_VALUE);
+
+        for (int i = 0; i < 100; i++) {
+            for (int j = 0; j <= i; j++) {
+                customerService.buyItem(customer.getCustomerId(), itemArrayList.get(i).getItemId());
+                customerService.buyItem(customer.getCustomerId(), dummyItemArrayList.get(i).getItemId());
+                customerService.buyItem(customer.getCustomerId(), dummyItemArrayList2.get(i).getItemId());
+            }
+        }
+
+        Collections.reverse(itemArrayList);
+
+        List<Item> items = itemService.showRemainItemListByStoreIdOrderBySell(store.getStoreId());
+
+        for (int i = 0; i < 100; i++) {
+            assertThat(itemArrayList.get(i).getItemName()).isEqualTo(items.get(i).getItemName());
+        }
+    }
 }
