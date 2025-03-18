@@ -40,6 +40,7 @@ public class ItemService {
     }
 
 
+    @CacheEvict(value = "itemCache", key = "#result.storeId", condition = "#result.quantity == 0")
     public Item minusQuantity(long itemId) {
         Item item = this.itemRepository.findById(itemId)
                 .orElseThrow(() -> new IllegalStateException("해당하는 물품이 없습니다."));
