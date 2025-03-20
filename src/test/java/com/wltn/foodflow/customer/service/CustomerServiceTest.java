@@ -55,4 +55,36 @@ class CustomerServiceTest {
         assertThat(customerItem.getCustomerId()).isEqualTo(customer.getCustomerId());
         assertThat(customerItem.getItemId()).isEqualTo(item.getItemId());
     }
+
+    @Test
+    //@Transactional
+    public void 물건_구매_실패_테스트() {
+        Store store = storeService.saveStore("store", StoreType.KOREAN);
+        Item item = itemService.itemSave(store.getStoreId(), "비빔밥", 8000, 1);
+        Customer c1 = customerService.customerSave("c1", 5000);
+        Customer c2 = customerService.customerSave("c2", 10000);
+        Customer c3 = customerService.customerSave("c3", 10000);
+
+        {
+            IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
+                    () -> customerService.buyItem(c1.getCustomerId(), item.getItemId())
+            );
+            assertThat(illegalStateException.getMessage()).isEqualTo("포인트보다 비싼 물건을 구매할 수 없습니다.");
+        }
+
+        {
+            CustomerItem customerItem = customerService.buyItem(c2.getCustomerId(), item.getItemId());
+            assertThat(customerItem.getCustomerId()).isEqualTo(c2.getCustomerId());
+            assertThat(customerItem.getItemId()).isEqualTo(item.getItemId());
+        }
+
+        System.out.println(item.getQuantity());
+        {
+            IllegalStateException illegalStateException2 = assertThrows(IllegalStateException.class,
+                    () -> customerService.buyItem(c3.getCustomerId(), item.getItemId())
+            );
+            System.out.println(item.getQuantity());
+            assertThat(illegalStateException2.getMessage()).isEqualTo("남은 재고가 없습니다.");
+        }
+    }
 }
