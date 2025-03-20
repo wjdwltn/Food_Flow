@@ -14,13 +14,12 @@ public @interface RedissonLock {
      */
     String key();
 
-    /**
-     * 락을 기다리는 시간
-     */
-    long waitTime() default 3L;
+    /* 락의 시간 단위 : tryLock()의 TimeUnit 파라미터에 사용 */
+    TimeUnit timeUnit() default TimeUnit.SECONDS;
 
-    /**
-     * 락 임대 시간
-     */
-    long leaseTime() default 10L;
+    /* 락 획득을 위해 기다리는 시간 (default - 5s) : 락 획득을 위해 waitTime 만큼 대기 */
+    long waitTime() default 5L;
+
+    /* 락 점유 시간 (default - 3s) : 락을 획득한 이후 leaseTime 이 지나면 락을 해제한다 */
+    long leaseTime() default 3L;
 }

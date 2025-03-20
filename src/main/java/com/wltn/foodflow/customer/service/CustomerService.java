@@ -8,10 +8,15 @@ import com.wltn.foodflow.customeritem.service.CustomerItemService;
 import com.wltn.foodflow.item.entity.Item;
 import com.wltn.foodflow.item.repository.ItemRepository;
 import com.wltn.foodflow.item.service.ItemService;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.aop.framework.AopContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -21,12 +26,17 @@ import java.util.concurrent.TimeUnit;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class CustomerService {
+public class CustomerService{
     private final CustomerRepository customerRepository;
     private final ItemService itemService;
+    private final ItemRepository itemRepository;
     private final CustomerItemService customerItemService;
     private final RedissonClient redissonClient;
 
+    @Autowired
+    private CustomerService self;
+
+    private final String BUY_ITEM_KEY = "BUY_ITEM_REDISSON_KEY";
 
     @Transactional
     public Customer customerSave(String customerName, int point) {
@@ -51,16 +61,35 @@ public class CustomerService {
         return customer;
     }
 
+    @Transactional
     public CustomerItem buyItem(long customerId, long itemId){
         Item item = itemService.minusQuantity(itemId);
         Customer customer = minusPoint(customerId, item);
         return customerItemService.customerItemSave(customer.getCustomerId(),item.getItemId());
     }
 
+    public void buyItemWithRedisson(long customerId, long itemId) {
+        RLock rLock = redissonClient.getLock(BUY_ITEM_KEY);
 
-    @Transactional
-    @RedissonLock(key = "#customerId")
-    public CustomerItem buyItemWithRedisson(long customerId, long itemId) {
-        return buyItem(customerId, itemId);
+        try {
+            boolean available = rLock.tryLock(3, 5, TimeUnit.SECONDS);
+
+            if (!available) {
+                throw new RuntimeException("구매 과정 중 lock 획득 실패");
+            }
+
+           self.buyItem(customerId, itemId);
+
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            rLock.unlock();
+            System.out.println("!!!!Lock 해제");
+        }
+    }
+
+    @CacheEvict(value = "itemCache", key = "#storeId")
+    public void refreshItemCache(long storeId) {
+        System.out.println("Cache evicted for storeId: " + storeId);
     }
 }
