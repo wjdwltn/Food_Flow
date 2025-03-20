@@ -87,4 +87,32 @@ class CustomerServiceTest {
             assertThat(illegalStateException2.getMessage()).isEqualTo("남은 재고가 없습니다.");
         }
     }
+
+    @Test
+    @DisplayName("여러_고객이_하나의_물건을_구매")
+    public void 여러_고객이_하나의_물건을_구매() throws InterruptedException{
+        Store store = storeService.saveStore("store", StoreType.KOREAN);
+        Item item = itemService.itemSave(store.getStoreId(), "비빔밥", 8000, 12);
+
+        int threadCount = 30;
+        ExecutorService executorService = Executors.newFixedThreadPool(32);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+
+        for (int i=0; i<threadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    Customer customer = customerService.customerSave("손님", 10000);
+                    customerService.buyItemWithRedisson(customer.getCustomerId(), item.getItemId());
+
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+
+        List<CustomerItem> all = customerItemRepository.findAll();
+        assertThat(all.size()).isEqualTo(12);
+    }
 }
