@@ -60,7 +60,7 @@
 - [**물건 구매 성공 테스트**](https://github.com/wjdwltn/Food_Flow/blob/77f4b8db4afc0bdb44c22118cf9767054128c55b/src/test/java/com/wltn/foodflow/customer/service/CustomerServiceTest.java#L49)
 - [**물건 구매 실패 테스트**](https://github.com/wjdwltn/Food_Flow/blob/77f4b8db4afc0bdb44c22118cf9767054128c55b/src/test/java/com/wltn/foodflow/customer/service/CustomerServiceTest.java#L61)
   - SpringBootTest @Transactional로 인한 오류 발생
-  -  @Transactional rollback 동작과 격리 수준을 고려한 문제 해결
+  -  [@Transactional rollback 동작과 격리 수준을 고려한 문제 해결](https://nine-kitty-d57.notion.site/Spring-Boot-Transactional-rollback-1bd13be7db218078b221d435b122c077?pvs=4)
 
 ### Case 1. [여러 고객이 하나의 물건을 구매](https://github.com/wjdwltn/Food_Flow/blob/77f4b8db4afc0bdb44c22118cf9767054128c55b/src/test/java/com/wltn/foodflow/customer/service/CustomerServiceTest.java#L93)하는 경우
 
@@ -68,7 +68,7 @@
   - 지난 프로젝트에서는 간단한 락만 필요했기에 **Lettuce** 사용
   - lettuce보다 빠르고, 여러 DB 테이블에 걸쳐서 진행될 수 있고 분산 환경을 고려하여 **Redisson**을 선택
   - 이를 통해 여러 쓰레드에서 한꺼번에 접근해도 동시성 문제 해결 완료
-- 이전 Self-Invocation 해결 경험으로 동일 서비스에서의 내부 호출 오류 해결
+- 이전 [Self-Invocation 해결 경험으로 동일 서비스에서의 내부 호출 오류 해결](https://nine-kitty-d57.notion.site/Self-Invocation-Cacheable-Transactional-1bd13be7db21803db864f15fb074a4e4?pvs=4)
 
 ### Case 2. [하나의 고객이 여러 번 동일 물건을 구매](https://github.com/wjdwltn/Food_Flow/blob/77f4b8db4afc0bdb44c22118cf9767054128c55b/src/test/java/com/wltn/foodflow/customer/service/CustomerServiceTest.java#L120)하는 경우
 
