@@ -27,18 +27,20 @@
     ```sql
     select store_id, remained, item_id from item where 1=1 and store_id = 2 and quantity >= 1;
     ```
-
+    - <img src="https://github.com/user-attachments/assets/f03f38ac-f5bb-479f-a52c-e1a46a8f6073" width="900" height="40"/>
   - **성능 비교**  
      인덱스를 쓰지 않은 결과(drop index idx_storeid_remained on item;)에 비해
-    - **인덱스 미사용** : 성능 저하 확인.
-    
-    - **인덱스 사용** : 속도가 크게 향상됨.
+    - **인덱스 미사용**
+    - ![Image](https://github.com/user-attachments/assets/9a4ce2a7-9622-4921-971d-4404421f353c)
+    - **인덱스 사용** -> 속도가  향상됨.
     
 
 
 - **Redis**를 통한 캐싱과 속도 확인
   - [여러 유저가 보는 경우 테스트](https://github.com/wjdwltn/Food_Flow/blob/19deeed4080148d68631119e9fc598c283a44ac0/src/test/java/com/wltn/foodflow/item/service/ItemServiceTest.java#L79)
   - 둘은 동일한 결과를 보여주지만, 속도는 캐시를 통하는게 훨씬 빠르다.
+  - jmeter 성능 비교(100명이 1초마다 30번 요청하도록) -> Averae : 약 14배 성능 차이
+  - ![Image](https://github.com/user-attachments/assets/cff509a9-88d9-4896-85b6-5d767e04b2b3)
   - **캐시 갱신** : [새로운 음식이 등록될 때마다 캐시를 갱신한다.](https://github.com/wjdwltn/Food_Flow/blob/19deeed4080148d68631119e9fc598c283a44ac0/src/main/java/com/wltn/foodflow/item/service/ItemService.java#L19) [테스트 확인](https://github.com/wjdwltn/Food_Flow/blob/19deeed4080148d68631119e9fc598c283a44ac0/src/test/java/com/wltn/foodflow/item/service/ItemServiceTest.java#L118)
     - 매번 등록할 때에 갱신하는 이유는, 음식의 경우 가게에서 새로운 음식을 등록하는 경우보다 고객이 찾는 경우가 훨씬 많기 때문이다.
     - 일종의 write-through 전략.
@@ -55,12 +57,12 @@
 - **유저가 구매한 물건** 데이터를 저장합니다.
 
 **테스트 순서**
-- **물건 구매 성공 테스트**
-- **물건 구매 실패 테스트**
+- [**물건 구매 성공 테스트**](https://github.com/wjdwltn/Food_Flow/blob/77f4b8db4afc0bdb44c22118cf9767054128c55b/src/test/java/com/wltn/foodflow/customer/service/CustomerServiceTest.java#L49)
+- [**물건 구매 실패 테스트**](https://github.com/wjdwltn/Food_Flow/blob/77f4b8db4afc0bdb44c22118cf9767054128c55b/src/test/java/com/wltn/foodflow/customer/service/CustomerServiceTest.java#L61)
   - SpringBootTest @Transactional로 인한 오류 발생
   -  @Transactional rollback 동작과 격리 수준을 고려한 문제 해결
 
-### Case 1. 여러 고객이 하나의 물건을 구매하는 경우
+### Case 1. [여러 고객이 하나의 물건을 구매](https://github.com/wjdwltn/Food_Flow/blob/77f4b8db4afc0bdb44c22118cf9767054128c55b/src/test/java/com/wltn/foodflow/customer/service/CustomerServiceTest.java#L93)하는 경우
 
 - **Redisson**을 사용하여 **분산 락**을 적용
   - 지난 프로젝트에서는 간단한 락만 필요했기에 **Lettuce** 사용
@@ -68,7 +70,7 @@
   - 이를 통해 여러 쓰레드에서 한꺼번에 접근해도 동시성 문제 해결 완료
 - 이전 Self-Invocation 해결 경험으로 동일 서비스에서의 내부 호출 오류 해결
 
-### Case 2. 하나의 고객이 여러 번 동일 물건을 구매하는 경우
+### Case 2. [하나의 고객이 여러 번 동일 물건을 구매](https://github.com/wjdwltn/Food_Flow/blob/77f4b8db4afc0bdb44c22118cf9767054128c55b/src/test/java/com/wltn/foodflow/customer/service/CustomerServiceTest.java#L120)하는 경우
 
 - 위와 동일하게 **Redisson**을 통해 동시성 문제를 해결
 
