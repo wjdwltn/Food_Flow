@@ -17,8 +17,8 @@
 ## 구현
 
 ### 1. 재고가 존재하는 모든 요리 확인
-- 테스트 로직
-- **QueryDSL**을 사용하여 `remain >= 1`인 음식만 조회한다.
+- [테스트 로직](https://github.com/wjdwltn/Food_Flow/blob/19deeed4080148d68631119e9fc598c283a44ac0/src/test/java/com/wltn/foodflow/item/service/ItemServiceTest.java#L45)
+- [**QueryDSL**](https://github.com/wjdwltn/Food_Flow/blob/19deeed4080148d68631119e9fc598c283a44ac0/src/main/java/com/wltn/foodflow/item/repository/ItemRepositoryImpl.java#L22)을 사용하여 `remain >= 1`인 음식만 조회한다.
 - **index**를 생성하여 검색 진행:
     ```sql
     CREATE INDEX idx_storeid_remained ON item (store_id, remained);
@@ -37,9 +37,9 @@
 
 
 - **Redis**를 통한 캐싱과 속도 확인
-  - 여러 유저가 보는 경우 테스트
+  - [여러 유저가 보는 경우 테스트](https://github.com/wjdwltn/Food_Flow/blob/19deeed4080148d68631119e9fc598c283a44ac0/src/test/java/com/wltn/foodflow/item/service/ItemServiceTest.java#L79)
   - 둘은 동일한 결과를 보여주지만, 속도는 캐시를 통하는게 훨씬 빠르다.
-  - **캐시 갱신** : 새로운 음식이 등록될 때마다 캐시를 갱신한다.
+  - **캐시 갱신** : [새로운 음식이 등록될 때마다 캐시를 갱신한다.](https://github.com/wjdwltn/Food_Flow/blob/19deeed4080148d68631119e9fc598c283a44ac0/src/main/java/com/wltn/foodflow/item/service/ItemService.java#L19) [테스트 확인](https://github.com/wjdwltn/Food_Flow/blob/19deeed4080148d68631119e9fc598c283a44ac0/src/test/java/com/wltn/foodflow/item/service/ItemServiceTest.java#L118)
     - 매번 등록할 때에 갱신하는 이유는, 음식의 경우 가게에서 새로운 음식을 등록하는 경우보다 고객이 찾는 경우가 훨씬 많기 때문이다.
     - 일종의 write-through 전략.
 
