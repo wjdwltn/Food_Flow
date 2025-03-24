@@ -66,7 +66,7 @@
 
 - **Redisson**을 사용하여 **분산 락**을 적용
   - 지난 프로젝트에서는 간단한 락만 필요했기에 **Lettuce** 사용
-  - lettuce보다 빠르고, 여러 DB 테이블에 걸쳐서 진행될 수 있고 분산 환경을 고려하여 **Redisson**을 선택
+  - [lettuce보다 빠르고](https://nine-kitty-d57.notion.site/Redis-Lettuce-Redisson-1c013be7db21804ea80ae794f1a8a9b5?pvs=4), 여러 DB 테이블에 걸쳐서 진행될 수 있고 분산 환경을 고려하여 [DB lock](https://nine-kitty-d57.notion.site/Optimistic-Pessimisitc-1c013be7db21808da489ddb0e1fc45fe?pvs=4)보다는 **Redisson**을 선택
   - 이를 통해 여러 쓰레드에서 한꺼번에 접근해도 동시성 문제 해결 완료
 - 이전 [Self-Invocation 해결 경험으로 동일 서비스에서의 내부 호출 오류 해결](https://nine-kitty-d57.notion.site/Self-Invocation-Cacheable-Transactional-1bd13be7db21803db864f15fb074a4e4?pvs=4)
 
