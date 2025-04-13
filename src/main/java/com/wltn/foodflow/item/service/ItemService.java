@@ -54,6 +54,20 @@ public class ItemService {
         return item;
     }
 
+    @Transactional
+    @CacheEvict(value = "itemCache", key = "#result.storeId", condition = "#result.quantity == 0")
+    public Item minusQuantityWithPessimisticLock(long itemId) {
+        Item item = this.itemRepository.findByIdWithPessimisticLock(itemId)
+                .orElseThrow(() -> new IllegalStateException("해당하는 물품이 없습니다."));
+
+        if (item.getQuantity() == 0) {
+            throw new IllegalStateException("남은 재고가 없습니다.");
+        }
+
+        item.setQuantity(item.getQuantity() - 1);
+        return item;
+    }
+
     @Transactional(readOnly = true)
     public List<Item> showRemainItemListByStoreIdOrderBySell(long storeId) {
         return this.itemRepository.showRemainItemListByStoreIdOrderBySell(storeId);

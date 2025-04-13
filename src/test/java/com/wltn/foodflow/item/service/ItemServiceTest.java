@@ -54,11 +54,15 @@ class ItemServiceTest {
         itemList.add(item1);
         itemList.add(item2);
         for(int i=0; i<30; i++) {
+            itemService.itemSave(store2.getStoreId(), "테스트데이터", 10000, 10);
+            itemList.add(itemService.itemSave(store.getStoreId(), "테스트데이터", 10000, 10));
+            itemList.add(itemService.itemSave(store.getStoreId(), "테스트데이터", 10000, 10));
+            itemList.add(itemService.itemSave(store.getStoreId(), "테스트데이터", 10000, 10));
             itemList.add(itemService.itemSave(store.getStoreId(), "테스트데이터", 10000, 10));
         }
-        for(int i=0; i<3000; i++) {
-            itemService.itemSave(store2.getStoreId(), "테스트데이터", 10000, 10);
-        }
+//        for(int i=0; i<800; i++) {
+//            itemService.itemSave(store2.getStoreId(), "테스트데이터", 10000, 10);
+//        }
         ArrayList<Item> itemNotRemainingList = new ArrayList<>();
         itemNotRemainingList.add(item3);
         itemNotRemainingList.add(item4);

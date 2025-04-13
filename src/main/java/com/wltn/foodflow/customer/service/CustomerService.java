@@ -68,6 +68,13 @@ public class CustomerService{
         return customerItemService.customerItemSave(customer.getCustomerId(),item.getItemId());
     }
 
+    @Transactional
+    public CustomerItem buyItemWithPessimisticLock(long customerId, long itemId){
+        Item item = itemService.minusQuantityWithPessimisticLock(itemId);
+        Customer customer = minusPoint(customerId, item);
+        return customerItemService.customerItemSave(customer.getCustomerId(),item.getItemId());
+    }
+
     public void buyItemWithRedisson(long customerId, long itemId) {
         RLock rLock = redissonClient.getLock(BUY_ITEM_KEY);
 

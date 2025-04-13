@@ -1,9 +1,6 @@
 package com.wltn.foodflow.item.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
@@ -20,6 +17,9 @@ public class Item {
     private int price;
     private int quantity;
     private long storeId;
+
+    @Version
+    private Long version;
 
     public int minusQuantity() {
         if (quantity == 0) {
